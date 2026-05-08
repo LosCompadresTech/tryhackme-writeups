@@ -1,1 +1,1 @@
-# tryhackme-writeups
+# TryHackMe - Agent Sudo Write-Up
